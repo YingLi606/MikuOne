@@ -1374,7 +1374,7 @@ check_update() {
         done) &
         local load_pid=$!
 
-        git clone --depth 1 "$repo_url" "$local_repo_dir" || {
+        git clone --depth 1 "$repo_url" "$local_repo_dir" &>/dev/null || {
             kill $load_pid
             echo -ne "\r"
             echo -e "${RED}${ICON_ERROR}  错误：仓库初始化失败！${RESET}\n"
@@ -1403,7 +1403,7 @@ check_update() {
             read -n 1
             return 1
         }
-        git pull origin master || {
+        git pull origin master &>/dev/null || {
             kill $load_pid
             echo -ne "\r"
             echo -e "${RED}${ICON_ERROR}  错误：获取更新失败！${RESET}\n"
@@ -1435,7 +1435,7 @@ check_update() {
         done) &
         local load_pid=$!
 
-        git fetch --all && git reset --hard origin/master || {
+        git fetch --all &>/dev/null && git reset --hard origin/master &>/dev/null || {
             kill $load_pid
             echo -ne "\r"
             echo -e "${RED}${ICON_ERROR}  错误：强制修复失败！${RESET}\n"
