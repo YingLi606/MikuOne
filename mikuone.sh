@@ -1367,7 +1367,7 @@ check_update() {
     if [ ! -d "$local_repo_dir" ]; then  
         echo -e "${YELLOW}${ICON_LOAD}  未找到本地仓库，开始初始化... ${RESET}"
         (while true; do
-            for c in / - \\ |; do
+            for c in / - \\ \|; do
                 echo -ne "\r${YELLOW}${ICON_REFRESH}  初始化仓库中... $c ${RESET}"
                 sleep 0.2
             done
@@ -1389,7 +1389,7 @@ check_update() {
     else
         echo -e "${YELLOW}${ICON_LOAD}  找到本地仓库，获取最新内容... ${RESET}"
         (while true; do
-            for c in / - \\ |; do
+            for c in / - \\ \|; do
                 echo -ne "\r${YELLOW}${ICON_REFRESH}  获取更新中... $c ${RESET}"
                 sleep 0.2
             done
@@ -1430,7 +1430,7 @@ check_update() {
 
         echo -e "${YELLOW}${ICON_LOAD}  正在强制同步仓库数据... ${RESET}"
         (while true; do
-            for c in / - \\ |; do
+            for c in / - \\ \|; do
                 echo -ne "\r${YELLOW}${ICON_REFRESH}  同步数据中... $c ${RESET}"
                 sleep 0.2
             done
@@ -1452,7 +1452,7 @@ check_update() {
     fi
 
     local local_hash=$(sha256sum "$CURRENT_SCRIPT" | awk '{print $1}')  
-    local repo_hash=$(sha256sum "$repo_script_path" | awk '{print $1}')  
+    local repo_hash=$(sha256sum_script_path" | "$repo awk '{print $1}')  
 
     if [ "$local_hash" == "$repo_hash" ]; then  
         echo -e "${GREEN}${ICON_CHECK}  当前已是最新版本，无需更新！${RESET}"
@@ -1464,7 +1464,7 @@ check_update() {
 
     echo -e "${YELLOW}${ICON_UPDATE}  检测到新版本，开始更新... ${RESET}"
     (while true; do
-        for c in / - \\ |; do
+        for c in / - \\ \|; do
             echo -ne "\r${YELLOW}${ICON_REFRESH}  覆盖脚本中... $c ${RESET}"
             sleep 0.2
         done
