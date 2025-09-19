@@ -2366,7 +2366,7 @@ uninstall_mikuone() {
                 return 1
             }
             
-            if [ -d "mikuone" ]; then
+            if [ -d "MikuOne" ]; then
                 sudo rm -rf "MikuOne"
                 echo -e "\033[1;32m→ 已删除 mikuone 文件夹\033[0m"
             else
