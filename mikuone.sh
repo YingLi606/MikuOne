@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 版本号定义
-CURRENT_VERSION="V14.1.0-Beta"
+CURRENT_VERSION="V14.1.0"
 GITEE_REPO="https://github.com/YingLi606/MikuOne"
 
 # 动态获取当前脚本路径（用户环境适配版）
@@ -122,7 +122,7 @@ show_mikuone_art() {
      sleep 1
      # 输出版本边框（保持原样式）
      echo -e "${CYAN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}"
-     echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      MikuOne v14.0.5-Beta      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
+     echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      MikuOne v14.1.0      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
      echo -e "${CYAN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}\n"
 }
  
@@ -1305,125 +1305,217 @@ ppa_menu() {
 }
 
 check_update() {
+    # 颜色与图标常量（统一视觉风格）
+    local RED="\033[1;31m"
+    local GREEN="\033[1;32m"
+    local YELLOW="\033[1;33m"
+    local BLUE="\033[1;34m"
+    local PURPLE="\033[1;35m"
+    local CYAN="\033[1;36m"
+    local RESET="\033[0m"
+    # 功能图标
+    local ICON_CHECK="✅"
+    local ICON_ERROR="❌"
+    local ICON_LOAD="🔄"
+    local ICON_WARN="⚠️"
+    local ICON_INFO="ℹ️"
+    local ICON_UPDATE="🆙"
+    local ICON_USER="👤"
+    local ICON_REFRESH="🔁"
+
+    # 固定路径定义
     local SYSTEM_PATH="/usr/games/mikuone"  
     local USER_PATH="$HOME/.local/bin/mikuone"  
     local KALI_PATH="/usr/local/bin/mikuone"  
     local CURRENT_SCRIPT=$(readlink -f "$0")  
+    # 仓库与脚本变量
+    local repo_url="https://github.com/YingLi606/MikuOne.git"  
+    local local_repo_dir="$HOME/.mikuone-repo"  
+    local script_name=$(basename "$CURRENT_SCRIPT")  
+    local restart_flag=0  
 
+    # 1. 路径校验警告（优化样式）
     if [[ "$CURRENT_SCRIPT" == "$SYSTEM_PATH" || "$CURRENT_SCRIPT" == "$KALI_PATH" || "$CURRENT_SCRIPT" == "$USER_PATH" ]]; then
-        echo -e "──────────────────────────"
-        echo -e "\033[1;31m警告：请前往克隆仓库（mikuome）目录里更新\033[0m"
-        echo -e "──────────────────────────"
-        echo -e "\033[33m 按 Enter 键返回主菜单\033[0m"
+        clear
+        echo -e "${PURPLE}==================================================${RESET}"
+        echo -e "${RED}${ICON_WARN}  警告：请前往克隆仓库（mikuone）目录执行更新 ${RESET}"
+        echo -e "${PURPLE}==================================================${RESET}"
+        echo -e "\n${YELLOW}  按 Enter 键返回主菜单 ${RESET}"
         read -p ""  
         clear       
         return 1  
     fi
 
-    local repo_url="https://github.com/YingLi606/MikuOne.git"  
-    local local_repo_dir="$HOME/.mikuone-repo"  
-    local script_path=$(readlink -f "$0")  
-    local script_name=$(basename "$script_path")  
-    local restart_flag=0  
-
+    # 2. 主页面标题（渐变色+图标）
     clear  
-    echo -e "\033[1;32m==================== 更新检测 ====================\033[0m"
-    echo -e "→ 当前用户：$(whoami)"         
-    echo -e "→ 当前脚本路径：$script_path" 
-    echo -e "→ 正在连接 Github 仓库：$repo_url" 
-    echo -e "\033[1;34m==================================================\033[0m"
+    echo -e "${CYAN}==================================================${RESET}"
+    echo -e "${GREEN}${ICON_UPDATE}        MikuOne 程序更新检测        ${RESET}"
+    echo -e "${CYAN}==================================================${RESET}"
+    echo -e "${BLUE}${ICON_USER}  当前操作用户：$(whoami)                  ${RESET}"         
+    echo -e "${CYAN}==================================================${RESET}\n"
+
+    # 3. 检查Git工具（带加载动画）
+    echo -e "${YELLOW}${ICON_LOAD}  正在检查必要工具（Git）... ${RESET}"
+    # 动态加载动画（3帧循环）
+    for ((i=0; i<3; i++)); do
+        echo -ne "\r${YELLOW}${ICON_LOAD}  检查工具中... ${i+1}/3 ${RESET}"
+        sleep 0.3
+    done
+    echo -ne "\r"  # 清除加载行
 
     if ! command -v git &>/dev/null; then  
-        echo -e "\033[1;31m错误：未安装 Git 工具！\033[0m"
-        echo -e "→ 解决方法：执行 sudo apt install git 安装" 
-        echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
+        echo -e "${RED}${ICON_ERROR}  错误：未安装 Git 工具！${RESET}\n"
+        echo -e "${BLUE}${ICON_INFO}  解决方案：执行 sudo apt install git 安装 ${RESET}" 
+        echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
         read -n 1  
         return 1   
     fi
+    echo -e "${GREEN}${ICON_CHECK}  Git 工具已就绪 ✔️ ${RESET}\n"
 
+    # 4. 处理本地仓库（克隆/拉取，带旋转动画）
     if [ ! -d "$local_repo_dir" ]; then  
-        echo -e "→ 本地仓库未找到，开始克隆远程仓库..."
-        git clone --depth 1 "$repo_url" "$local_repo_dir" 2>&1 | tee /tmp/git-clone.log || {  
-            echo -e "\033[1;31m错误：仓库克隆失败！\033[0m"
-            echo -e "→ 日志路径：/tmp/git-clone.log" 
-            echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
+        echo -e "${YELLOW}${ICON_LOAD}  未找到本地仓库，开始初始化... ${RESET}"
+        # 旋转加载动画（后台运行）
+        (while true; do
+            for c in / - \ |; do
+                echo -ne "\r${YELLOW}${ICON_REFRESH}  初始化仓库中... $c ${RESET}"
+                sleep 0.2
+            done
+        done) &
+        local load_pid=$!  # 记录动画进程ID
+
+        # 执行仓库克隆
+        git clone --depth 1 "$repo_url" "$local_repo_dir" 2>&1 | tee /tmp/git-clone.log
+        kill $load_pid  # 停止动画
+        echo -ne "\r"  # 清除动画行
+
+        if [ $? -ne 0 ]; then  
+            echo -e "${RED}${ICON_ERROR}  错误：仓库初始化失败！${RESET}\n"
+            echo -e "${BLUE}${ICON_INFO}  日志位置：/tmp/git-clone.log ${RESET}" 
+            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
             return 1 
-        }
+        fi
+        echo -e "${GREEN}${ICON_CHECK}  仓库初始化成功 ✔️ ${RESET}\n"
     else
-        echo -e "→ 本地仓库已存在，拉取最新内容..."
+        echo -e "${YELLOW}${ICON_LOAD}  找到本地仓库，获取最新内容... ${RESET}"
+        # 拉取动画（旋转效果）
+        (while true; do
+            for c in / - \ |; do
+                echo -ne "\r${YELLOW}${ICON_REFRESH}  获取更新中... $c ${RESET}"
+                sleep 0.2
+            done
+        done) &
+        local load_pid=$!
+
+        # 执行仓库拉取
         cd "$local_repo_dir" || {
-            echo -e "\033[1;31m错误：进入本地仓库目录失败！\033[0m"
-            echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
+            kill $load_pid
+            echo -ne "\r"
+            echo -e "${RED}${ICON_ERROR}  错误：无法进入仓库目录！${RESET}"
+            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
             return 1
         }
-        git pull origin master 2>&1 | tee /tmp/git-pull.log || {  
-            echo -e "\033[1;31m错误：仓库更新失败！\033[0m"
-            echo -e "→ 日志路径：/tmp/git-pull.log"
-            echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
+        git pull origin master 2>&1 | tee /tmp/git-pull.log
+        kill $load_pid
+        echo -ne "\r"
+
+        if [ $? -ne 0 ]; then  
+            echo -e "${RED}${ICON_ERROR}  错误：获取更新失败！${RESET}\n"
+            echo -e "${BLUE}${ICON_INFO}  日志位置：/tmp/git-pull.log ${RESET}"
+            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
             return 1 
         }
+        echo -e "${GREEN}${ICON_CHECK}  最新内容获取成功 ✔️ ${RESET}\n"
     fi
 
+    # 5. 校验仓库脚本存在性
     local repo_script_path="$local_repo_dir/$script_name"  
     if [ ! -f "$repo_script_path" ]; then  
-        echo -e "\033[1;31m错误：仓库中未找到脚本 $script_name！尝试强制更新...\033[0m"
+        echo -e "${RED}${ICON_WARN}  警告：仓库中未找到目标脚本，尝试强制修复... ${RESET}\n"
         cd "$local_repo_dir" || {
-            echo -e "\033[1;31m错误：本地仓库目录不存在！\033[0m"
-            echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
+            echo -e "${RED}${ICON_ERROR}  错误：仓库目录不存在！${RESET}"
+            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
             return 1
         }
-        echo -e "→ 正在执行 git fetch --all 拉取远程数据..."
-        git fetch --all 2>&1 | tee /tmp/git-fetch.log || {  
-            echo -e "\033[1;31m错误：fetch 操作失败！日志保存至 /tmp/git-fetch.log\033[0m"
-            echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
-            read -n 1
-            return 1
-        }
-        echo -e "→ 正在执行 git reset --hard origin/master 重置本地分支..."
-        git reset --hard origin/master 2>&1 | tee /tmp/git-reset.log || {  
-            echo -e "\033[1;31m错误：reset 操作失败！日志保存至 /tmp/git-reset.log\033[0m"
-            echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
-            read -n 1
-            return 1
-        }
+
+        # 强制修复（带加载动画）
+        echo -e "${YELLOW}${ICON_LOAD}  正在强制同步仓库数据... ${RESET}"
+        (while true; do
+            for c in / - \ |; do
+                echo -ne "\r${YELLOW}${ICON_REFRESH}  同步数据中... $c ${RESET}"
+                sleep 0.2
+            done
+        done) &
+        local load_pid=$!
+
+        # 执行强制同步
+        git fetch --all 2>&1 | tee /tmp/git-fetch.log && git reset --hard origin/master 2>&1 | tee /tmp/git-reset.log
+        kill $load_pid
+        echo -ne "\r"
+
+        # 二次校验
         repo_script_path="$local_repo_dir/$script_name"
         if [ ! -f "$repo_script_path" ]; then
-            echo -e "\033[1;31m错误：强制更新后仍未找到脚本 $script_name！\033[0m"
-            echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
+            echo -e "${RED}${ICON_ERROR}  错误：强制修复后仍未找到脚本！${RESET}"
+            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
             return 1
-        fi  # 【修复点】将原错误的 `}` 改为 `fi`，正确闭合 if 语句
-        echo -e "\033[1;32m→ 强制更新成功，已重新获取脚本文件！\033[0m"
+        fi
+        echo -e "${GREEN}${ICON_CHECK}  强制修复成功，脚本已恢复 ✔️ ${RESET}\n"
     fi
 
-    local local_hash=$(sha256sum "$script_path" | awk '{print $1}')  
+    # 6. 对比版本（SHA256校验）
+    local local_hash=$(sha256sum "$CURRENT_SCRIPT" | awk '{print $1}')  
     local repo_hash=$(sha256sum "$repo_script_path" | awk '{print $1}')  
 
     if [ "$local_hash" == "$repo_hash" ]; then  
-        echo -e "\033[1;32m✅ 当前已是最新版本，无需更新！\033[0m"
-        echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
+        echo -e "${GREEN}${ICON_CHECK}  当前已是最新版本，无需更新！${RESET}"
+        echo -e "\n${CYAN}==================================================${RESET}"
+        echo -e "${YELLOW}  按任意键返回主菜单... ${RESET}"
         read -n 1
         return 0 
     fi
 
-    echo -e "→ 检测到新版本，开始覆盖更新..."
-    cp -f "$repo_script_path" "$script_path" || {  
-        echo -e "\033[1;31m错误：脚本覆盖失败！\033[0m"
-        echo -e "\033[1;33m按任意键返回主菜单...\033[0m"
+    # 7. 执行更新覆盖
+    echo -e "${YELLOW}${ICON_UPDATE}  检测到新版本，开始更新... ${RESET}"
+    (while true; do
+        for c in / - \ |; do
+            echo -ne "\r${YELLOW}${ICON_REFRESH}  覆盖脚本中... $c ${RESET}"
+            sleep 0.2
+        done
+    done) &
+    local load_pid=$!
+
+    # 覆盖脚本并添加执行权限
+    cp -f "$repo_script_path" "$CURRENT_SCRIPT" && chmod +x "$CURRENT_SCRIPT"
+    kill $load_pid
+    echo -ne "\r"
+
+    if [ $? -ne 0 ]; then  
+        echo -e "${RED}${ICON_ERROR}  错误：脚本更新失败！${RESET}"
+        echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
         read -n 1
         return 1 
-    }
-    chmod +x "$script_path"  
+    fi
     restart_flag=1  
 
+    # 8. 更新完成+3秒倒计时重启
     if [ $restart_flag -eq 1 ]; then  
-        echo -e "\033[1;32m✅ 更新完成！3 秒后自动重启...\033[0m"
-        sleep 3
-        exec "$script_path" "$@"  
+        clear
+        echo -e "${GREEN}==================================================${RESET}"
+        echo -e "${GREEN}${ICON_CHECK}        更新完成！即将自动重启        ${RESET}"
+        echo -e "${GREEN}==================================================${RESET}\n"
+        # 3秒倒计时（动态数字）
+        for ((t=3; t>0; t--)); do
+            echo -ne "\r${YELLOW}  倒计时：$t 秒后重启... ${RESET}"
+            sleep 1
+        done
+        echo -ne "\r"
+        exec "$CURRENT_SCRIPT" "$@"  # 重启脚本
     fi
 }
 

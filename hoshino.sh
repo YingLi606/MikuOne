@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 版本号定义（仅用于显示）
-CURRENT_VERSION="V14.0.5-Beta"
+CURRENT_VERSION="V14.0.5"
 GITEE_REPO="https://github.com/YingLi606/MikuOne"
 
 # 动态获取当前脚本路径（用户环境适配版）
@@ -60,7 +60,7 @@ print_banner() {
   
   # 边框与标题（保持零间隔风格）
   echo -e "${GREEN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}"
-  echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      Hoshino v14.0.5-Beta      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
+  echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      Hoshino v14.0.5      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
   echo -e "${GREEN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}\n"
 }
 
