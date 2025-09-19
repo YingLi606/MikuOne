@@ -1374,17 +1374,16 @@ check_update() {
         done) &
         local load_pid=$!
 
-        git clone --depth 1 "$repo_url" "$local_repo_dir" 2>&1 | tee /tmp/git-clone.log
-        kill $load_pid
-        echo -ne "\r"
-
-        if [ $? -ne 0 ]; then  
+        git clone --depth 1 "$repo_url" "$local_repo_dir" || {
+            kill $load_pid
+            echo -ne "\r"
             echo -e "${RED}${ICON_ERROR}  错误：仓库初始化失败！${RESET}\n"
-            echo -e "${BLUE}${ICON_INFO}  日志位置：/tmp/git-clone.log ${RESET}" 
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
             return 1 
-        fi
+        }
+        kill $load_pid
+        echo -ne "\r"
         echo -e "${GREEN}${ICON_CHECK}  仓库初始化成功 ✔️ ${RESET}\n"
     else
         echo -e "${YELLOW}${ICON_LOAD}  找到本地仓库，获取最新内容... ${RESET}"
@@ -1404,17 +1403,16 @@ check_update() {
             read -n 1
             return 1
         }
-        git pull origin master 2>&1 | tee /tmp/git-pull.log
-        kill $load_pid
-        echo -ne "\r"
-
-        if [ $? -ne 0 ]; then  
+        git pull origin master || {
+            kill $load_pid
+            echo -ne "\r"
             echo -e "${RED}${ICON_ERROR}  错误：获取更新失败！${RESET}\n"
-            echo -e "${BLUE}${ICON_INFO}  日志位置：/tmp/git-pull.log ${RESET}"
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
             return 1 
-        fi
+        }
+        kill $load_pid
+        echo -ne "\r"
         echo -e "${GREEN}${ICON_CHECK}  最新内容获取成功 ✔️ ${RESET}\n"
     fi
 
@@ -1437,7 +1435,14 @@ check_update() {
         done) &
         local load_pid=$!
 
-        git fetch --all 2>&1 | tee /tmp/git-fetch.log && git reset --hard origin/master 2>&1 | tee /tmp/git-reset.log
+        git fetch --all && git reset --hard origin/master || {
+            kill $load_pid
+            echo -ne "\r"
+            echo -e "${RED}${ICON_ERROR}  错误：强制修复失败！${RESET}\n"
+            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
+            read -n 1
+            return 1
+        }
         kill $load_pid
         echo -ne "\r"
 
@@ -1452,7 +1457,7 @@ check_update() {
     fi
 
     local local_hash=$(sha256sum "$CURRENT_SCRIPT" | awk '{print $1}')  
-    local repo_hash=$(sha256sum_script_path" | "$repo awk '{print $1}')  
+    local repo_hash=$(sha256sum "$repo_script_path" | awk '{print $1}')  
 
     if [ "$local_hash" == "$repo_hash" ]; then  
         echo -e "${GREEN}${ICON_CHECK}  当前已是最新版本，无需更新！${RESET}"
@@ -1471,16 +1476,16 @@ check_update() {
     done) &
     local load_pid=$!
 
-    cp -f "$repo_script_path" "$CURRENT_SCRIPT" && chmod +x "$CURRENT_SCRIPT"
-    kill $load_pid
-    echo -ne "\r"
-
-    if [ $? -ne 0 ]; then  
+    cp -f "$repo_script_path" "$CURRENT_SCRIPT" && chmod +x "$CURRENT_SCRIPT" || {
+        kill $load_pid
+        echo -ne "\r"
         echo -e "${RED}${ICON_ERROR}  错误：脚本更新失败！${RESET}"
         echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
         read -n 1
         return 1 
-    fi
+    }
+    kill $load_pid
+    echo -ne "\r"
     restart_flag=1  
 
     if [ $restart_flag -eq 1 ]; then  
