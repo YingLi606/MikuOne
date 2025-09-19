@@ -1362,7 +1362,7 @@ check_update() {
         read -n 1  
         return 1   
     fi
-    echo -e "${GREEN}${ICON_CHECK}  Git 工具已就绪 ✔️ ${RESET}\n"
+    echo -e "${GREEN}${ICON_CHECK}  Git 工具已就绪或检测已安装 ✔️ ${RESET}\n"
 
     if [ ! -d "$local_repo_dir" ]; then  
         echo -e "${YELLOW}${ICON_LOAD}  未找到本地仓库，开始初始化... ${RESET}"
@@ -1380,6 +1380,7 @@ check_update() {
             echo -e "${RED}${ICON_ERROR}  错误：仓库初始化失败！${RESET}\n"
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
+            clear
             return 1 
         }
         kill $load_pid
@@ -1401,6 +1402,7 @@ check_update() {
             echo -e "${RED}${ICON_ERROR}  错误：无法进入仓库目录！${RESET}"
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
+            clear
             return 1
         }
         git pull origin master &>/dev/null || {
@@ -1409,6 +1411,7 @@ check_update() {
             echo -e "${RED}${ICON_ERROR}  错误：获取更新失败！${RESET}\n"
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
+            clear
             return 1 
         }
         kill $load_pid
@@ -1441,6 +1444,7 @@ check_update() {
             echo -e "${RED}${ICON_ERROR}  错误：强制修复失败！${RESET}\n"
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
+            clear
             return 1
         }
         kill $load_pid
@@ -1451,6 +1455,7 @@ check_update() {
             echo -e "${RED}${ICON_ERROR}  错误：强制修复后仍未找到脚本！${RESET}"
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
+            clear
             return 1
         fi
         echo -e "${GREEN}${ICON_CHECK}  强制修复成功，脚本已恢复 ✔️ ${RESET}\n"
@@ -1464,6 +1469,7 @@ check_update() {
         echo -e "\n${CYAN}==================================================${RESET}"
         echo -e "${YELLOW}  按任意键返回主菜单... ${RESET}"
         read -n 1
+        clear
         return 0 
     fi
 
@@ -1479,9 +1485,10 @@ check_update() {
     cp -f "$repo_script_path" "$CURRENT_SCRIPT" && chmod +x "$CURRENT_SCRIPT" || {
         kill $load_pid
         echo -ne "\r"
-        echo -e "${RED}${ICON_ERROR}  错误：脚本更新失败！${RESET}"
+        echo -e "${RED}${ICON_ERROR}  错误：脚本更新失败！请检查你的网络环境，实在不行开魔法${RESET}"
         echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
         read -n 1
+        clear
         return 1 
     }
     kill $load_pid
