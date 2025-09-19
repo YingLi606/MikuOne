@@ -24,11 +24,11 @@ MikuOne 是一个基于 Shell 的系统管理工具，提供多种常用软件�
 1. 确保系统已安装 `git` 和 `whiptail`。
 2. 下载脚本：
    ```bash
-   git clone https://gitee.com/baicong222_admin/mikuone.git
+   git clone https://github.com/YingLi606/MikuOne.git
    ```
 3. 进入克隆仓库目录：
    ```bash
-   cd mikuone
+   cd MikuOne
    ```
 
 ## 使用说明
