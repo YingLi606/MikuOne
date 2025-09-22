@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 版本号定义
-CURRENT_VERSION="V14.1.0"
+CURRENT_VERSION="V14.1.5"
 GITEE_REPO="https://github.com/YingLi606/MikuOne"
 
 # 动态获取当前脚本路径（用户环境适配版）
@@ -122,7 +122,7 @@ show_mikuone_art() {
      sleep 1
      # 输出版本边框（保持原样式）
      echo -e "${CYAN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}"
-     echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      MikuOne v14.1.0      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
+     echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      MikuOne v14.1.5      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
      echo -e "${CYAN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}\n"
 }
  
@@ -2864,7 +2864,7 @@ tmoe_start() {
 apt_start(){
     pretty_print APT "⌛️ 正在切换中...";
     sudo -v || { echo -e "${RED}❌ 请输入sudo密码授权${RESET}"; exit 1; };
-    ping -c3 www.bing.com &>/dev/null || { echo -e "${RED}❌ 网络不通${RESET}"; exit 1; };
+    ping -c3 www.baidu.com &>/dev/null || { echo -e "${RED}❌ 网络不通${RESET}"; exit 1; };
     sudo bash -c "bash <(curl -sSL https://linuxmirrors.cn/main.sh)" && echo -e "${GREEN}✅ 执行完成${RESET}" || echo -e "${RED}❌ 执行失败${RESET}";
     sleep 3; clear;
 }
