@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 版本号定义
-CURRENT_VERSION="V14.1.5"
+CURRENT_VERSION="V15.0.0"
 GITEE_REPO="https://gh.xmly.dev/https://github.com/YingLi606/SakiSP"
 
 # 动态获取当前脚本路径（用户环境适配版）
