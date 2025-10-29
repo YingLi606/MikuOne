@@ -2,7 +2,7 @@
 
 # 版本号定义
 CURRENT_VERSION="V14.1.5"
-GITEE_REPO="https://github.com/YingLi606/MikuOne"
+GITEE_REPO="https://gh.xmly.dev/https://github.com/YingLi606/SakiSP"
 
 # 动态获取当前脚本路径（用户环境适配版）
 if [ -L "$0" ]; then
@@ -18,10 +18,10 @@ LOCAL_SCRIPT_PATH=$(cd "$(dirname "$LOCAL_SCRIPT_PATH")" && pwd)/$(basename "$LO
 # 自动识别用户安装路径（关键修改）
 if [ "$(id -u)" -eq 0 ]; then
     # root用户使用系统路径
-    SYSTEM_INSTALL_PATH="/usr/games/mikuone"
+    SYSTEM_INSTALL_PATH="/usr/games/sakisp"
 else
     # 普通用户使用主目录路径
-    SYSTEM_INSTALL_PATH="$HOME/.local/bin/mikuone"
+    SYSTEM_INSTALL_PATH="$HOME/.local/bin/sakisp"
 fi
 
 # 确保用户安装目录存在
@@ -48,8 +48,7 @@ get_system_info() {
 }
 
 show_launch_animation() {
-  # 阶段1：MIKU艺术字
-  show_mikuone_art
+  show_sakisp_art
   
   # 系统信息（零间隔显示）
   system_info=$(get_system_info)
@@ -111,18 +110,18 @@ show_launch_animation() {
         sleep 0.2
     done
 
-    echo -e "        ${WHITE}即将进入MikuOne...${RESET}"
+    echo -e "        ${WHITE}即将进入 SakiSP...${RESET}"
     sleep 1.2
     clear
 }
 
-show_mikuone_art() {
-     # 生成 "MIKUONE" 艺术字并彩虹色输出
-     figlet "MIKUONE" | lolcat
+show_sakisp_art() {
+     # 生成 "sakisp" 艺术字并彩虹色输出
+     figlet "SakiSP" | lolcat
      sleep 1
      # 输出版本边框（保持原样式）
      echo -e "${CYAN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}"
-     echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      MikuOne v14.1.5      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
+     echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      SakiSP V15.0.0      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
      echo -e "${CYAN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}\n"
 }
  
@@ -278,21 +277,21 @@ install_to_system_path() {
     if is_kali; then
         if [ "$(id -u)" -eq 0 ]; then
             # Kali纯root用户：安装到/usr/local/bin
-            SYSTEM_INSTALL_PATH="/usr/local/bin/mikuone"
+            SYSTEM_INSTALL_PATH="/usr/local/bin/sakisp"
             PATH_DIR="/usr/local/bin"
         else
             # Kali普通用户：安装到用户级路径$HOME/.local/bin
-            SYSTEM_INSTALL_PATH="$HOME/.local/bin/mikuone"
+            SYSTEM_INSTALL_PATH="$HOME/.local/bin/sakisp"
             PATH_DIR="$HOME/.local/bin"
         fi
     else
         if [ "$(id -u)" -eq 0 ]; then
             # 非Kali纯root用户：安装到/usr/games
-            SYSTEM_INSTALL_PATH="/usr/games/mikuone"
+            SYSTEM_INSTALL_PATH="/usr/games/sakisp"
             PATH_DIR="/usr/games"
         else
             # 非Kali普通用户：安装到用户级路径$HOME/.local/bin
-            SYSTEM_INSTALL_PATH="$HOME/.local/bin/mikuone"
+            SYSTEM_INSTALL_PATH="$HOME/.local/bin/sakisp"
             PATH_DIR="$HOME/.local/bin"
         fi
     fi
@@ -328,7 +327,7 @@ install_to_system_path() {
             fi
             
             echo -e "${GREEN}✅ 脚本已成功安装${RESET}"
-            echo -e "${GREEN}下次可直接使用 'mikuone' 命令启动${RESET}"
+            echo -e "${GREEN}下次可直接使用 'sakisp' 命令启动${RESET}"
             sleep 2
         else
             echo -e "${RED}❌ 安装失败，可能原因：${RESET}"
@@ -1321,19 +1320,20 @@ check_update() {
     local ICON_USER="👤"
     local ICON_REFRESH="🔁"
 
-    local SYSTEM_PATH="/usr/games/mikuone"  
-    local USER_PATH="$HOME/.local/bin/mikuone"  
-    local KALI_PATH="/usr/local/bin/mikuone"  
+    local SYSTEM_PATH="/usr/games/sakisp"  
+    local USER_PATH="$HOME/.local/bin/sakisp"  
+    local KALI_PATH="/usr/local/bin/sakisp"  
     local CURRENT_SCRIPT=$(readlink -f "$0")  
-    local repo_url="https://github.com/YingLi606/MikuOne.git"  
-    local local_repo_dir="$HOME/.mikuone-repo"  
+    local repo_url="https://gh.xmly.dev/https://github.com/YingLi606/SakiSP.git"  
+    local TEMP_DIR="$HOME/.sakisp-temp-repo"  # 临时仓库目录（原local_repo_dir）
+    local A_DIR="$HOME/SakiSP"          # 目标仓库目录（需被临时目录覆盖）
     local script_name=$(basename "$CURRENT_SCRIPT")  
     local restart_flag=0  
 
     if [[ "$CURRENT_SCRIPT" == "$SYSTEM_PATH" || "$CURRENT_SCRIPT" == "$KALI_PATH" || "$CURRENT_SCRIPT" == "$USER_PATH" ]]; then
         clear
         echo -e "${PURPLE}==================================================${RESET}"
-        echo -e "${RED}${ICON_WARN}  警告：请前往克隆仓库（mikuone）目录执行更新 ${RESET}"
+        echo -e "${RED}${ICON_WARN}  警告：请前往克隆仓库（SakiSP）目录执行更新 ${RESET}"
         echo -e "${PURPLE}==================================================${RESET}"
         echo -e "\n${YELLOW}  按 Enter 键返回主菜单 ${RESET}"
         read -p ""  
@@ -1343,7 +1343,7 @@ check_update() {
 
     clear  
     echo -e "${CYAN}==================================================${RESET}"
-    echo -e "${GREEN}${ICON_UPDATE}        MikuOne 程序更新检测        ${RESET}"
+    echo -e "${GREEN}${ICON_UPDATE}        SakiSP 更新检测        ${RESET}"
     echo -e "${CYAN}==================================================${RESET}"
     echo -e "${BLUE}${ICON_USER}  当前操作用户：$(whoami)                  ${RESET}"         
     echo -e "${CYAN}==================================================${RESET}\n"
@@ -1364,66 +1364,52 @@ check_update() {
     fi
     echo -e "${GREEN}${ICON_CHECK}  Git 工具已就绪或检测已安装 ✔️ ${RESET}\n"
 
-    if [ ! -d "$local_repo_dir" ]; then  
-        echo -e "${YELLOW}${ICON_LOAD}  未找到本地仓库，开始初始化... ${RESET}"
-        (while true; do
-            for c in / - \\ \|; do
-                echo -ne "\r${YELLOW}${ICON_REFRESH}  初始化仓库中... $c ${RESET}"
-                sleep 0.2
-            done
-        done) &
-        local load_pid=$!
+    # 核心修改：1. 清理旧临时目录 2. 克隆新临时仓库 3. 覆盖目标目录
+    echo -e "${YELLOW}${ICON_LOAD}  初始化临时仓库并更新目标目录... ${RESET}"
+    (while true; do
+        for c in / - \\ \|; do
+            echo -ne "\r${YELLOW}${ICON_REFRESH}  处理仓库中... $c ${RESET}"
+            sleep 0.2
+        done
+    done) &
+    local load_pid=$!
 
-        git clone --depth 1 "$repo_url" "$local_repo_dir" &>/dev/null || {
-            kill $load_pid
-            echo -ne "\r"
-            echo -e "${RED}${ICON_ERROR}  错误：仓库初始化失败！${RESET}\n"
-            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
-            read -n 1
-            clear
-            return 1 
-        }
+    rm -rf "$TEMP_DIR" &>/dev/null
+
+    git clone --depth 1 "$repo_url" "$TEMP_DIR" &>/dev/null || {
         kill $load_pid
         echo -ne "\r"
-        echo -e "${GREEN}${ICON_CHECK}  仓库初始化成功 ✔️ ${RESET}\n"
-    else
-        echo -e "${YELLOW}${ICON_LOAD}  找到本地仓库，获取最新内容... ${RESET}"
-        (while true; do
-            for c in / - \\ \|; do
-                echo -ne "\r${YELLOW}${ICON_REFRESH}  获取更新中... $c ${RESET}"
-                sleep 0.2
-            done
-        done) &
-        local load_pid=$!
-
-        cd "$local_repo_dir" || {
-            kill $load_pid
-            echo -ne "\r"
-            echo -e "${RED}${ICON_ERROR}  错误：无法进入仓库目录！${RESET}"
-            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
-            read -n 1
-            clear
-            return 1
-        }
-        git pull origin master &>/dev/null || {
-            kill $load_pid
-            echo -ne "\r"
-            echo -e "${RED}${ICON_ERROR}  错误：获取更新失败！${RESET}\n"
-            echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
-            read -n 1
-            clear
-            return 1 
-        }
+        echo -e "${RED}${ICON_ERROR}  错误：临时仓库克隆失败！${RESET}\n"
+        echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
+        read -n 1
+        clear
+        return 1 
+    }
+ 
+    mkdir -p "$A_DIR" &>/dev/null
+    rm -rf "$A_DIR"/* &>/dev/null  # 清空目标目录旧内容
+    cp -r "$TEMP_DIR"/* "$A_DIR/" &>/dev/null || {
         kill $load_pid
         echo -ne "\r"
-        echo -e "${GREEN}${ICON_CHECK}  最新内容获取成功 ✔️ ${RESET}\n"
-    fi
+        echo -e "${RED}${ICON_ERROR}  错误：仓库覆盖目标目录失败！${RESET}\n"
+        echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
+        read -n 1
+        clear
+        return 1 
+    }
+    # 4. 清理临时目录（用完即删）
+    rm -rf "$TEMP_DIR" &>/dev/null
 
-    local repo_script_path="$local_repo_dir/$script_name"  
+    kill $load_pid
+    echo -ne "\r"
+    echo -e "${GREEN}${ICON_CHECK}  仓库更新完成✔️ ${RESET}\n"
+    sleep 1
+
+    local repo_script_path="$A_DIR/$script_name"  # 脚本路径改为目标目录
     if [ ! -f "$repo_script_path" ]; then  
-        echo -e "${RED}${ICON_WARN}  警告：仓库中未找到目标脚本，尝试强制修复... ${RESET}\n"
-        cd "$local_repo_dir" || {
-            echo -e "${RED}${ICON_ERROR}  错误：仓库目录不存在！${RESET}"
+        echo -e "${RED}${ICON_WARN}  警告：目标仓库中未找到目标脚本，尝试强制修复... ${RESET}\n"
+        cd "$A_DIR" || {
+            echo -e "${RED}${ICON_ERROR}  错误：目标仓库目录不存在！${RESET}"
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
             read -n 1
             return 1
@@ -1450,7 +1436,7 @@ check_update() {
         kill $load_pid
         echo -ne "\r"
 
-        repo_script_path="$local_repo_dir/$script_name"
+        repo_script_path="$A_DIR/$script_name"
         if [ ! -f "$repo_script_path" ]; then
             echo -e "${RED}${ICON_ERROR}  错误：强制修复后仍未找到脚本！${RESET}"
             echo -e "\n${YELLOW}  按任意键返回主菜单... ${RESET}"
@@ -1693,9 +1679,9 @@ main_menu() {
     while true; do
         choice=$(whiptail --clear \
             --backtitle "" \
-            --title "MikuOne ${CURRENT_VERSION} - oo~ee~oo" \
+            --title "SakiSP ${CURRENT_VERSION} " \
             --menu "✨ 请选择类别： \n
-MikuOne 14,在这里,从这一刻开始！ \n
+SakiSP 15,在这里,从这一刻开始！ \n
 🔧 提示：使用 ↓↑ 键导航，按 Enter 确认" \
             0 60 0 \
             "1" "💼 软件中心 —— 应用宝库" \
@@ -2314,7 +2300,7 @@ EOF
                 ;;
 
             "3") 
-                uninstall_mikuone
+                uninstall_sakisp
                 ;;
 
             "0") 
@@ -2325,12 +2311,12 @@ EOF
     done
 }
 
-uninstall_mikuone() {
+uninstall_sakisp() {
     while true; do
         whiptail --title "卸载确认" --yesno "你确定要卸载此脚本吗？" 10 60
         if [ $? -eq 0 ]; then
             clear
-            echo -e "\033[1;31m开始执行 Mikuone 脚本卸载流程...\033[0m"
+            echo -e "\033[1;31m开始执行 sakisp 脚本卸载流程...\033[0m"
             sleep 1
             
             cd ~ || {
@@ -2342,9 +2328,9 @@ uninstall_mikuone() {
             echo -e "\033[1;34m已切换到主目录：$(pwd)\033[0m"
             sleep 0.5
             
-            local SYSTEM_PATH="/usr/games/mikuone"  
-            local USER_PATH="$HOME/.local/bin/mikuone"  
-            local KALI_PATH="/usr/local/bin/mikuone"  
+            local SYSTEM_PATH="/usr/games/sakisp"  
+            local USER_PATH="$HOME/.local/bin/sakisp"  
+            local KALI_PATH="/usr/local/bin/sakisp"  
 
             if [ -f "$SYSTEM_PATH" ]; then
                 sudo rm -f "$SYSTEM_PATH"
@@ -2373,24 +2359,24 @@ uninstall_mikuone() {
                 return 1
             }
             
-            if [ -d "MikuOne" ]; then
-                sudo rm -rf "MikuOne"
-                echo -e "\033[1;32m→ 已删除 mikuone 文件夹\033[0m"
+            if [ -d "sakisp" ]; then
+                sudo rm -rf "sakisp"
+                echo -e "\033[1;32m→ 已删除 sakisp 文件夹\033[0m"
             else
-                echo -e "\033[1;33m→ mikuone 文件夹不存在，跳过删除\033[0m"
+                echo -e "\033[1;33m→ sakisp 文件夹不存在，跳过删除\033[0m"
             fi
             
-            if [ -d ".mikuone-repo" ]; then
-                sudo rm -rf ".mikuone-repo"
-                echo -e "\033[1;32m→ 已删除 .mikuone-repo 文件夹\033[0m"
+            if [ -d ".sakisp-repo" ]; then
+                sudo rm -rf ".sakisp-repo"
+                echo -e "\033[1;32m→ 已删除 .sakisp-repo 文件夹\033[0m"
             else
-                echo -e "\033[1;33m→ .mikuone-repo 文件夹不存在，跳过删除\033[0m"
+                echo -e "\033[1;33m→ .sakisp-repo 文件夹不存在，跳过删除\033[0m"
             fi
             sleep 0.5
             
             echo -e "\n\033[1;35m=================================================\033[0m"
-            echo -e "\033[1;32m✅ Mikuone 脚本已成功卸载完毕！（如在文件夹内,输入cd即可退出该文件夹，然后使用ls检查）\033[0m"
-            echo -e "\033[1;34m感谢您曾与 Mikuone 相伴，期待未来再次相遇～\033[0m"
+            echo -e "\033[1;32m✅ SakiSP 脚本已成功卸载完毕！（如在文件夹内,输入cd即可退出该文件夹，然后使用ls检查）\033[0m"
+            echo -e "\033[1;34m感谢您曾与 SakiSP 相伴，期待未来再次相遇～\033[0m"
             echo -e "\033[1;35m=================================================\033[0m"
             echo -e "\n\033[1;33m按回车键退出...\033[0m"
             read -r
@@ -3193,7 +3179,7 @@ install_chromium() {
 detect_system() {
     system="Unknown"
     # 基于当前用户家目录生成脚本路径（适配root和普通用户）
-    local base_dir="$HOME/MikuOne"  # 基础目录：root为/root/mikuone，普通用户为/home/用户名/mikuone
+    local base_dir="$HOME/SakiSP"  
     local ORANGE_SCRIPT="$base_dir/hoshino.sh"  # 专属脚本路径（避免全局变量冲突）
     
     # 优先通过lsb_release检测系统

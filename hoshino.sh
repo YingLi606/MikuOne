@@ -2,7 +2,7 @@
 
 # 版本号定义（仅用于显示）
 CURRENT_VERSION="V14.0.5"
-GITEE_REPO="https://github.com/YingLi606/MikuOne"
+GITEE_REPO="https://gh.xmly.dev/https://github.com/YingLi606/MikuOne"
 
 # 动态获取当前脚本路径（用户环境适配版）
 if [ -L "$0" ]; then
@@ -50,7 +50,7 @@ get_system_info() {
 print_banner() {
   clear
   
-  # MIKU艺术字（零间隔颜色前缀）
+  # 艺术字（零间隔颜色前缀）
   echo -e "\n${BLUE}███╗   ${GREEN}██╗  ${YELLOW}█████╗ ${MAGENTA}█████╗"
   echo -e "${BLUE}████╗  ${GREEN}██║  ${YELLOW}██╔══██╗${MAGENTA}██╔══██╗"
   echo -e "${BLUE}██╔██╗ ${GREEN}██║  ${YELLOW}███████║${MAGENTA}██║  ██║"
@@ -60,7 +60,7 @@ print_banner() {
   
   # 边框与标题（保持零间隔风格）
   echo -e "${GREEN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}"
-  echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      Hoshino v14.0.5      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
+  echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      Hoshino v15.0.0      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
   echo -e "${GREEN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}\n"
 }
 
@@ -812,9 +812,10 @@ check_update() {
         return 1
     fi
 
-    # 基础变量定义
-    local repo_url="https://github.com/YingLi606/MikuOne.git"
-    local local_repo="$HOME/.hoshino_update"
+    # 基础变量定义：新增临时目录（TEMP_REPO）和目标目录（LOCAL_REPO）
+    local repo_url="https://gh.xmly.dev/https://github.com/YingLi606/MikuOne.git"
+    local TEMP_REPO="$HOME/.hoshino_temp_repo"  
+    local LOCAL_REPO="$HOME/SakiSP"   
     local script_path=$(readlink -f "$0")
     local script_name=$(basename "$script_path")
     local need_restart=0
@@ -837,32 +838,38 @@ check_update() {
         return 1
     fi
 
-    # 初始化本地仓库（首次克隆/拉取）
+    # 核心修改：1.清理旧临时仓库 2.克隆新临时仓库 3.覆盖目标仓库 4.清理临时仓库
     echo -e "${BLUE}【1/4】准备仓库...${RESET}"
-    if [ ! -d "$local_repo" ]; then
-        echo -e "  ${YELLOW}首次更新，正在克隆仓库...${RESET}"
-        if git clone --depth 1 "$repo_url" "$local_repo"; then
-            echo -e "  ${GREEN}✅ 仓库克隆成功${RESET}"
-        else
-            echo -e "${RED}❌ 错误：仓库克隆失败${RESET}\n"
-            echo -e "${YELLOW}按任意键返回...${RESET}"
-            read -n 1
-            return 1
-        fi
-    else
-        echo -e "  ${YELLOW}已有仓库，正在拉取最新代码...${RESET}"
-        if cd "$local_repo" && git pull origin master; then
-            echo -e "  ${GREEN}✅ 代码拉取成功${RESET}"
-        else
-            echo -e "${RED}❌ 错误：拉取更新失败${RESET}\n"
-            echo -e "${YELLOW}按任意键返回...${RESET}"
-            read -n 1
-            return 1
-        fi
+    echo -e "  ${YELLOW}处理临时仓库，确保内容最新...${RESET}"
+    
+    # 1. 删除旧临时仓库（避免残留文件干扰）
+    rm -rf "$TEMP_REPO" &>/dev/null
+    
+    # 2. 克隆最新代码到临时仓库
+    if ! git clone --depth 1 "$repo_url" "$TEMP_REPO"; then
+        echo -e "${RED}❌ 错误：临时仓库克隆失败${RESET}\n"
+        echo -e "${YELLOW}按任意键返回...${RESET}"
+        read -n 1
+        return 1
     fi
+    
+    # 3. 确保目标仓库存在，清空后用临时仓库内容覆盖
+    mkdir -p "$LOCAL_REPO" &>/dev/null  # 确保目标目录存在
+    rm -rf "$LOCAL_REPO"/* &>/dev/null  # 清空目标目录旧内容
+    if ! cp -r "$TEMP_REPO"/* "$LOCAL_REPO/"; then
+        echo -e "${RED}❌ 错误：临时仓库覆盖目标目录失败${RESET}\n"
+        rm -rf "$TEMP_REPO"  # 清理失败的临时仓库
+        echo -e "${YELLOW}按任意键返回...${RESET}"
+        read -n 1
+        return 1
+    fi
+    
+    # 4. 清理临时仓库（用完即删，释放空间）
+    rm -rf "$TEMP_REPO" &>/dev/null
+    echo -e "  ${GREEN}✅ 仓库更新完成（临时仓库已清理）${RESET}"
 
-    # 检查仓库中是否存在目标脚本
-    local repo_script="$local_repo/$script_name"
+    # 检查仓库中是否存在目标脚本（基于目标仓库LOCAL_REPO）
+    local repo_script="$LOCAL_REPO/$script_name"
     echo -e "\n${BLUE}【2/4】验证脚本...${RESET}"
     if [ ! -f "$repo_script" ]; then
         echo -e "${RED}❌ 错误：未找到脚本 $script_name${RESET}\n"
@@ -873,7 +880,7 @@ check_update() {
         echo -e "  ${GREEN}✅ 脚本验证通过${RESET}"
     fi
 
-    # 比较版本差异（哈希校验）
+    # 比较版本差异（哈希校验，基于目标仓库脚本）
     echo -e "\n${BLUE}【3/4】检查版本...${RESET}"
     local local_hash=$(sha256sum "$script_path" | awk '{print $1}')
     local repo_hash=$(sha256sum "$repo_script" | awk '{print $1}')
@@ -1090,10 +1097,10 @@ main_menu() {
     while true; do
         choice=$(whiptail --clear \
             --backtitle "" \
-            --title "Hoshino ${CURRENT_VERSION} - oo~ee~oo" \
+            --title "Hoshino ${CURRENT_VERSION} " \
             --menu "✨ 请选择类别： \n
 未被定义的，那一刻，在代码与现实间闪烁... \n
-🔧 提示：使用 ↓↑ 键导航，按 Enter 确认；Hoshino 12.5，简化带来自由" \
+🔧 提示：使用 ↓↑ 键导航，按 Enter 确认；Hoshino 15.0.0，简化带来自由" \
             0 60 0 \
             "1" "💼 软件中心 —— 应用宝库" \
             "2" "🗄 工具箱 —— 一些有用的工具" \
