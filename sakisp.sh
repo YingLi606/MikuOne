@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 版本号定义
-CURRENT_VERSION="V15.0.0"
+CURRENT_VERSION="V15.0.5"
 GITEE_REPO="https://gh.xmly.dev/https://github.com/YingLi606/SakiSP"
 
 # 动态获取当前脚本路径（用户环境适配版）
@@ -121,7 +121,7 @@ show_sakisp_art() {
      sleep 1
      # 输出版本边框（保持原样式）
      echo -e "${CYAN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}"
-     echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      SakiSP V15.0.0      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
+     echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      SakiSP V15.0.5      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
      echo -e "${CYAN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}\n"
 }
  

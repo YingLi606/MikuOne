@@ -60,7 +60,7 @@ print_banner() {
   
   # 边框与标题（保持零间隔风格）
   echo -e "${GREEN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}"
-  echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      Hoshino v15.0.0      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
+  echo -e "${RED}▶${YELLOW}▶${GREEN}▶${CYAN}      Hoshino v15.0.5      ${GREEN}◀${YELLOW}◀${RED}◀${RESET}"
   echo -e "${GREEN}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${RESET}\n"
 }
 
@@ -133,11 +133,11 @@ show_launch_animation() {
     clear
 }
 
-# 安装依赖（适配Arch/Manjaro，优化yay安装方式）
+# 安装依赖（适配Arch/Manjaro，优化paru安装方式）
 install_deps() {
     # 依赖分类：官方仓库包（pacman可直接安装）
     local official_deps=("libnewt" "wget" "figlet" "jq" "unzip" "curl")
-    local aur_deps=("lolcat")  # AUR包，需yay辅助安装
+    local aur_deps=("lolcat")  # AUR包
     local missing_official=()
     local missing_aur=()
 
@@ -156,7 +156,7 @@ install_deps() {
     done
 
     if [ ${#missing_official[@]} -gt 0 ] || [ ${#missing_aur[@]} -gt 0 ]; then
-        echo -e "${RED}⚠ 正在安装缺失的依赖: ${missing_official[*]} ${missing_aur[*]} ${RESET}"
+        echo -e "${RED}⚠ 正在处理缺失的依赖: ${missing_official[*]} ${missing_aur[*]} ${RESET}"
         
         # 确保aria2安装
         if ! command -v aria2c &> /dev/null; then
@@ -183,31 +183,26 @@ install_deps() {
             fi
         fi
 
-        # 处理AUR依赖（需yay）
+        # 处理AUR依赖（不强制安装，仅提示）
         if [ ${#missing_aur[@]} -gt 0 ]; then
-            # 安装yay（优先Manjaro社区仓库，用pacman）
-            if ! command -v yay &> /dev/null; then
-                echo -e "${YELLOW}安装AUR助手yay...${RESET}"
-                sleep 3
-                # 检测系统是否为Manjaro（Manjaro的community仓库有yay）
-                if grep -q "Manjaro" /etc/os-release; then
-                    # Manjaro用pacman安装yay（社区仓库）
-                    if ! sudo pacman -S yay --noconfirm; then
-                        whiptail --title "错误" --msgbox "Manjaro安装yay失败，请确保启用community仓库。" 10 60
-                        exit 1
-                    fi
+            echo -e "${YELLOW}检测到缺失的AUR依赖: ${missing_aur[*]}${RESET}"
+            # 检查是否有AUR助手
+            if ! command -v paru &> /dev/null && ! command -v yay &> /dev/null; then
+                # 无AUR助手：提示但不退出
+                whiptail --title "提示" --msgbox "缺少AUR助手（paru/yay），无法自动安装AUR依赖\n\n部分功能可能无法使用，脚本将继续运行。" 12 60
+            else
+                # 有AUR助手：尝试安装
+                local aur_helper=""
+                if command -v paru &> /dev/null; then
+                    aur_helper="paru"
                 else
-                    # Arch Linux：官方仓库无yay，需提示用户（因用户要求不用编译）
-                    whiptail --title "提示" --msgbox "Arch Linux官方仓库无yay，需手动安装AUR助手（如yay）。\n\n可参考: 启用AUR后，用其他AUR助手安装yay。" 12 60
-                    exit 1
+                    aur_helper="yay"
                 fi
-            fi
-
-            # 用yay安装AUR依赖
-            echo -e "${YELLOW}安装AUR依赖: ${missing_aur[*]}${RESET}"
-            if ! yay -S "${missing_aur[@]}" --noconfirm; then
-                whiptail --title "错误" --msgbox "AUR依赖安装失败。" 10 60
-                exit 1
+                echo -e "${YELLOW}使用${aur_helper}安装AUR依赖: ${missing_aur[*]}${RESET}"
+                if ! ${aur_helper} -S "${missing_aur[@]}" --noconfirm; then
+                    # 安装失败：提示但不退出
+                    whiptail --title "提示" --msgbox "AUR依赖安装失败，部分功能可能无法使用。" 10 60
+                fi
             fi
         fi
     fi
@@ -583,11 +578,11 @@ install_firefox() {
     echo -e "  - ffmpeg (多媒体支持)${RESET}"
     delay 1
     
-    # 安装主程序+语言包+依赖（优先用pacman，如需AUR包自动切换yay）
+    # 安装主程序+语言包+依赖（优先用pacman，如需AUR包自动切换paru）
     install_cmd="sudo pacman -S --noconfirm"
     if ! $install_cmd "$pkg_name" "$lang_pkg" ffmpeg; then
         echo -e "${YELLOW}官方仓库安装失败，尝试AUR安装...${RESET}"
-        install_cmd="yay -S --noconfirm"  # 切换到yay（处理AUR包）
+        install_cmd="paru -S --noconfirm"  # 切换到paru（处理AUR包）
         if ! $install_cmd "$pkg_name" "$lang_pkg" ffmpeg; then
             echo -e "${RED}安装失败，是否重试? (Y/n)${RESET}"
             read -r choice
@@ -651,7 +646,7 @@ remove_firefox() {
         # 卸载主程序（包括配置文件和冗余依赖）
         sudo pacman -Rns --noconfirm "$pkg_name" || {
             echo -e "${YELLOW}主程序卸载失败，尝试强制清理...${RESET}"
-            yay -Rns --noconfirm "$pkg_name"  # 用yay处理残留
+            paru -Rns --noconfirm "$pkg_name"  # 用paru处理残留
         }
         
         # 卸载中文语言包（匹配所有相关语言包）
@@ -1100,7 +1095,7 @@ main_menu() {
             --title "Hoshino ${CURRENT_VERSION} " \
             --menu "✨ 请选择类别： \n
 未被定义的，那一刻，在代码与现实间闪烁... \n
-🔧 提示：使用 ↓↑ 键导航，按 Enter 确认；Hoshino 15.0.0，简化带来自由" \
+🔧 提示：使用 ↓↑ 键导航，按 Enter 确认；Hoshino 15.0.5，简化带来自由" \
             0 60 0 \
             "1" "💼 软件中心 —— 应用宝库" \
             "2" "🗄 工具箱 —— 一些有用的工具" \
@@ -1845,7 +1840,7 @@ install_qqarm64() {
     pretty_print "QQ" "正在通过AUR安装QQ (ARM64)...（若无法打开，尝试添加 --no-sandbox 启动参数）"
     
     # AUR中ARM64架构QQ包通常为linuxqq
-    if yay -S --noconfirm linuxqq; then
+    if paru -S --noconfirm linuxqq; then
         whiptail --title "完成" --msgbox "\nQQ (ARM64) 安装成功！" 10 40
     else
         whiptail --title "错误" --msgbox "\nQQ (ARM64) 安装失败，可能AUR包不存在或架构不匹配" 10 40
@@ -1857,7 +1852,7 @@ install_qqamd64() {
     pretty_print "QQ" "正在通过AUR安装QQ (AMD64)...（若无法打开，尝试添加 --no-sandbox 启动参数）"
     
     # AUR中x86_64架构QQ包通常为linuxqq
-    if yay -S --noconfirm linuxqq; then
+    if paru -S --noconfirm linuxqq; then
         whiptail --title "完成" --msgbox "\nQQ (AMD64) 安装成功！" 10 40
     else
         whiptail --title "错误" --msgbox "\nQQ (AMD64) 安装失败，可能AUR包不存在或依赖冲突" 10 40
@@ -1869,7 +1864,7 @@ install_wechatarm64() {
     pretty_print "WECHAT" "正在通过AUR安装微信 (ARM64)...（可能存在兼容性问题，建议谨慎使用）"
     
     # AUR中ARM64架构微信包通常为wechat
-    if yay -S --noconfirm wechat; then
+    if paru -S --noconfirm wechat; then
         whiptail --title "完成" --msgbox "\n微信 (ARM64) 安装成功！" 10 40
     else
         whiptail --title "错误" --msgbox "\n微信 (ARM64) 安装失败，AUR包可能暂不支持该架构" 10 40
@@ -1881,12 +1876,12 @@ install_wechatamd64() {
     pretty_print "WECHAT" "正在通过AUR安装微信 (AMD64)...（可能存在兼容性问题，建议谨慎使用）"
     
     # AUR中x86_64架构微信包通常为wechat-uos或electronic-wechat
-    if yay -S --noconfirm wechat; then
+    if paru -S --noconfirm wechat; then
         whiptail --title "完成" --msgbox "\n微信 (AMD64) 安装成功！" 10 40
     else
         # 备选包：若wechat-uos安装失败，尝试electronic-wechat
         echo -e "${YELLOW}尝试备选包安装...${RESET}"
-        if yay -S --noconfirm electronic-wechat; then
+        if paru -S --noconfirm electronic-wechat; then
             whiptail --title "完成" --msgbox "\n微信 (AMD64) 备选包安装成功！" 10 40
         else
             whiptail --title "错误" --msgbox "\n微信 (AMD64) 安装失败，建议检查AUR依赖" 10 40
@@ -1991,11 +1986,11 @@ install_chromium() {
         fi
     done
     
-    # 安装AUR包（使用yay）
+    # 安装AUR包（使用paru）
     echo -e "${GREEN}安装AUR包...${RESET}"
     for aur_pkg in "${aur_pkgs[@]}"; do
         echo -e "${BLUE}尝试安装AUR包: $aur_pkg${RESET}"
-        if yay -S --noconfirm "$aur_pkg"; then
+        if paru -S --noconfirm "$aur_pkg"; then
             success_pkgs+=("$aur_pkg")
         else
             missing_pkgs+=("$aur_pkg")
@@ -2102,8 +2097,7 @@ system_warning() {
 
 # 主程序入口
 main() {
-    detect_system
-    check_whiptail  
+    detect_system  
     install_deps    
     show_launch_animation  
     install_to_system_path 
