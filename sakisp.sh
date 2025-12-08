@@ -2359,8 +2359,8 @@ uninstall_sakisp() {
                 return 1
             }
             
-            if [ -d "sakisp" ]; then
-                sudo rm -rf "sakisp"
+            if [ -d "SakiSP" ]; then
+                sudo rm -rf "SakiSP"
                 echo -e "\033[1;32m→ 已删除 sakisp 文件夹\033[0m"
             else
                 echo -e "\033[1;33m→ sakisp 文件夹不存在，跳过删除\033[0m"

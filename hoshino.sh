@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 版本号定义（仅用于显示）
-CURRENT_VERSION="V14.0.5"
+CURRENT_VERSION="V15.0.5"
 GITEE_REPO="https://gh.xmly.dev/https://github.com/YingLi606/MikuOne"
 
 # 动态获取当前脚本路径（用户环境适配版）
@@ -1201,7 +1201,7 @@ EOF
                 ;;
 
             "3") 
-                uninstall_mikuone
+                uninstall_hoshino
                 ;;
 
             "0") 
@@ -1212,9 +1212,9 @@ EOF
     done
 }
 
-uninstall_mikuone() {
+uninstall_hoshino() {
     while true; do
-        whiptail --title "卸载确认" --yesno "你确定要卸载此脚本吗？" 10 60
+        whiptail --title "卸载确认" --yesno "你确定要卸载此脚本吗？会与文件夹一起删除的！" 10 60
         if [ $? -eq 0 ]; then
             clear
             echo -e "\033[1;31m开始执行 Hoshino 脚本卸载流程...\033[0m"
@@ -1260,11 +1260,11 @@ uninstall_mikuone() {
                 return 1
             }
             
-            if [ -d "MikuOne" ]; then
+            if [ -d "SakiSP" ]; then
                 sudo rm -rf "MikuOne"
-                echo -e "\033[1;32m→ 已删除 mikuone 文件夹\033[0m"
+                echo -e "\033[1;32m→ 已删除 SakiSP 文件夹\033[0m"
             else
-                echo -e "\033[1;33m→ mikuone 文件夹不存在，跳过删除\033[0m"
+                echo -e "\033[1;33m→ SakiSP 文件夹不存在，跳过删除\033[0m"
             fi
             
             if [ -d ".hoshino_update" ]; then
